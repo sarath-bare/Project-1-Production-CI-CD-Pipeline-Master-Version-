@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-cicd-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: production-cicd-app
+  template:
+    metadata:
+      labels:
+        app: production-cicd-app
+    spec:
+      containers:
+        - name: production-cicd-app
+          image: sarathbare/production-cicd-pipeline:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
