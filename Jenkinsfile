@@ -25,7 +25,18 @@ pipeline {
                 }
             }
         }
-
+        stage('Run Automated Tests') {
+            steps {
+                sh '''
+                    echo "Running automated tests..."
+        
+                    pip install -r app/requirements.txt
+                    pytest -v
+        
+                    echo "All automated tests passed!"
+                '''
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 sh '''
