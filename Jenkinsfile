@@ -112,12 +112,32 @@ pipeline {
     }
 
     post {
-        success {
-            echo 'Production CI/CD Pipeline completed successfully!'
-        }
-
-        failure {
-            echo 'Production CI/CD Pipeline failed!'
-        }
+    success {
+        echo """
+========================================
+       DEPLOYMENT SUCCESSFUL
+========================================
+Application : production-cicd-app
+Image       : ${IMAGE_NAME}:${GIT_COMMIT_SHORT}
+Status      : SUCCESS
+========================================
+"""
     }
+
+    failure {
+        echo """
+========================================
+       DEPLOYMENT FAILED
+========================================
+Application : production-cicd-app
+Image       : ${IMAGE_NAME}:${GIT_COMMIT_SHORT}
+Status      : FAILED
+========================================
+"""
+    }
+
+    always {
+        echo "Pipeline execution completed."
+    }
+}
 }
