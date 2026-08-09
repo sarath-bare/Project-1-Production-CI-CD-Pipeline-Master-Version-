@@ -43,38 +43,56 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        
+        stage('Deploy and Health Check') {
             steps {
-                sh '''
-                    kubectl set image deployment/production-cicd-app \
-                    production-cicd-app=${IMAGE_NAME}:${GIT_COMMIT_SHORT}
-                '''
+                script {
+                    try {
+                        sh '''
+                            echo "Deploying image: ${IMAGE_NAME}:${GIT_COMMIT_SHORT}"
+        
+                            kubectl set image deployment/production-cicd-app \
+                            production-cicd-app=${IMAGE_NAME}:${GIT_COMMIT_SHORT}
+        
+                            echo "Waiting for Kubernetes rollout..."
+                            kubectl rollout status deployment/production-cicd-app --timeout=120s
+        
+                            echo "Checking application health..."
+        
+                            kubectl port-forward svc/production-cicd-service 5001:5000 \
+                            >/tmp/port-forward.log 2>&1 &
+        
+                            PORT_FORWARD_PID=$!
+        
+                            sleep 3
+        
+                            curl --fail http://localhost:5001/health
+        
+                            kill $PORT_FORWARD_PID
+        
+                            echo "Application health check passed!"
+                        '''
+                    } catch (Exception e) {
+        
+                        echo "Deployment or health check failed!"
+                        echo "Rolling back Kubernetes deployment..."
+        
+                        sh '''
+                            kubectl rollout undo deployment/production-cicd-app
+        
+                            echo "Waiting for rollback to complete..."
+                            kubectl rollout status deployment/production-cicd-app --timeout=120s
+        
+                            echo "Rollback completed."
+                        '''
+        
+                        error("Deployment failed. Kubernetes rollback executed.")
+                    }
+                }
             }
         }
-
-        stage('Wait for Rollout') {
-            steps {
-                sh '''
-                    kubectl rollout status deployment/production-cicd-app
-                '''
-            }
-        }
-        stage('Application Health Check') {
-            steps {
-                sh '''
-                    echo "Checking application health..."
         
-                    kubectl port-forward svc/production-cicd-service 5001:5000 >/tmp/port-forward.log 2>&1 &
-                    PORT_FORWARD_PID=$!
         
-                    sleep 3
-        
-                    curl --fail http://localhost:5001/health
-        
-                    kill $PORT_FORWARD_PID
-                '''
-            }
-        }
         stage('Verify Deployment') {
             steps {
                 sh '''
