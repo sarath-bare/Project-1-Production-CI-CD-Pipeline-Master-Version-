@@ -26,17 +26,27 @@ pipeline {
             }
         }
         stage('Run Automated Tests') {
-            steps {
-                sh '''
-                    echo "Running automated tests..."
+        steps {
+        sh '''
+        echo "Creating Python virtual environment..."
         
-                    pip install -r app/requirements.txt
-                    pytest -v
+        ```
+                python3 -m venv .venv
         
-                    echo "All automated tests passed!"
-                '''
-            }
+                echo "Installing dependencies..."
+        
+                .venv/bin/pip install --upgrade pip
+                .venv/bin/pip install -r app/requirements.txt
+        
+                echo "Running automated tests..."
+        
+                .venv/bin/pytest -v
+            '''
         }
+        ```
+        
+        }
+        
         stage('Build Docker Image') {
             steps {
                 sh '''
