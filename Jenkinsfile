@@ -40,7 +40,7 @@ stages {
 
                 echo "Running automated tests..."
 
-                .venv/bin/pytest -v
+                .venv/bin/pytest -v --junitxml=test-results.xml
 
                 echo "All automated tests passed!"
             '''
@@ -156,7 +156,9 @@ post {
     }
 
     always {
+        junit 'test-results.xml'
         echo "Pipeline execution completed."
+        
     }
 }
 
