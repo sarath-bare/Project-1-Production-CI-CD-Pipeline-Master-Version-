@@ -52,7 +52,7 @@ pipeline {
                             echo "Deploying image: ${IMAGE_NAME}:${GIT_COMMIT_SHORT}"
         
                             kubectl set image deployment/production-cicd-app \
-                            production-cicd-app=${IMAGE_NAME}:bad-test
+                            production-cicd-app=${IMAGE_NAME}:${GIT_COMMIT_SHORT}
         
                             echo "Waiting for Kubernetes rollout..."
                             kubectl rollout status deployment/production-cicd-app --timeout=120s
