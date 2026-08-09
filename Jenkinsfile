@@ -59,7 +59,20 @@ stages {
             '''
         }
     }
-
+   stage('Trivy Security Scan') {
+        steps {
+            sh '''
+                echo "Scanning Docker image for HIGH and CRITICAL vulnerabilities..."
+    
+                docker exec jenkins trivy image \
+                --severity HIGH,CRITICAL \
+                --exit-code 1 \
+                ${IMAGE_NAME}:${GIT_COMMIT_SHORT}
+    
+                echo "Trivy security scan passed!"
+            '''
+        }
+    }
     stage('Push Docker Image') {
         steps {
             sh '''
