@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 environment {
     IMAGE_NAME = "sarathbare/production-cicd-pipeline"
 }
@@ -160,6 +159,6 @@ post {
         echo "Pipeline execution completed."
     }
 }
-```
+
 
 }
