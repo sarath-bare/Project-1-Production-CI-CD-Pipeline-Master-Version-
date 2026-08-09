@@ -59,7 +59,22 @@ pipeline {
                 '''
             }
         }
-
+        stage('Application Health Check') {
+            steps {
+                sh '''
+                    echo "Checking application health..."
+        
+                    kubectl port-forward svc/production-cicd-service 5001:5000 >/tmp/port-forward.log 2>&1 &
+                    PORT_FORWARD_PID=$!
+        
+                    sleep 3
+        
+                    curl --fail http://localhost:5001/health
+        
+                    kill $PORT_FORWARD_PID
+                '''
+            }
+        }
         stage('Verify Deployment') {
             steps {
                 sh '''
